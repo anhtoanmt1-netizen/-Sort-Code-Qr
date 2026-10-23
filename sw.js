@@ -1,4 +1,4 @@
-const V = 'spx-scan-v4';
+const V = 'spx-scan-v5';
 const SHELL = ['./', 'index.html', 'manifest.json', 'data.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
 const EXTRA = [
   'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js',
