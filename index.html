@@ -31,7 +31,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
 body,input,select,button{font-family:'Montserrat',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{padding-bottom:calc(74px + env(safe-area-inset-bottom));overflow-x:hidden;font-size:14px}
+body{padding-bottom:calc(128px + env(safe-area-inset-bottom));overflow-x:hidden;font-size:14px}
 button{font-size:inherit;cursor:pointer;border:0}
 svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
@@ -231,9 +231,10 @@ input:disabled{cursor:not-allowed}
 .modal h3 svg{color:var(--brand);width:19px;height:19px}
 .modal p{color:var(--muted);font-size:12.5px;margin:7px 0;word-break:break-all;font-weight:500;line-height:1.5}
 .modal .btn{width:100%;margin-top:8px}
-.rdw{position:relative;border-radius:16px;overflow:hidden;background:#000}
-#reader{width:100%;min-height:230px}
-.vf{position:absolute;left:6%;width:88%;top:50%;height:62%;transform:translateY(-50%);pointer-events:none}
+.rdw{position:relative;border-radius:16px;overflow:hidden;background:#000;display:flex;flex-direction:column;justify-content:center;max-height:min(300px,38vh)}
+#reader{width:100%;flex:none}
+.vf{position:absolute;left:50%;top:50%;width:88%;height:62%;transform:translate(-50%,-50%);pointer-events:none}
+#scanOv .modal{padding:12px}
 .sline{position:absolute;left:3%;right:3%;top:6%;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent);box-shadow:0 0 10px 2px rgba(238,78,44,.7);animation:sl 1.8s ease-in-out infinite}
 @keyframes sl{0%,100%{top:6%}50%{top:94%}}
 .fring{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border:2px solid #fff;border-radius:50%;pointer-events:none;animation:fr .6s ease-out forwards}
@@ -258,6 +259,24 @@ input:disabled{cursor:not-allowed}
 .ios{display:none;margin:0 12px 8px;padding:9px 12px;border-radius:12px;background:var(--navy);color:#fff;font-size:11.5px;font-weight:500;line-height:1.45;position:relative;padding-right:36px}
 .ios.show{display:block}
 .ios button{position:absolute;right:7px;top:7px;width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.2);color:#fff}
+
+/* Nút nổi Quét mã (góc dưới trái, thuận tay cái) */
+.fab{position:fixed;left:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:25;height:50px;padding:0 18px 0 15px;border-radius:999px;
+  background:linear-gradient(135deg,var(--brand),#ff7a4d);color:#fff;font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 22px rgba(238,78,44,.5);animation:fabp 2.4s ease-out infinite;transition:transform .2s,opacity .2s}
+.fab svg{width:22px;height:22px}
+.fab:active{transform:scale(.93)}
+body.typing .fab{opacity:0;pointer-events:none;transform:scale(.8)}
+@keyframes fabp{0%{box-shadow:0 8px 22px rgba(238,78,44,.5),0 0 0 0 rgba(238,78,44,.45)}70%{box-shadow:0 8px 22px rgba(238,78,44,.5),0 0 0 12px rgba(238,78,44,0)}100%{box-shadow:0 8px 22px rgba(238,78,44,.5),0 0 0 0 rgba(238,78,44,0)}}
+
+/* Bảng cập nhật DATA */
+.or{display:flex;align-items:center;gap:8px;margin:10px 0 2px;color:var(--muted);font-size:11px;font-weight:600}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.dmeta{font-size:11px;color:var(--muted);font-weight:500;margin-top:10px;line-height:1.5}
+.cred{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center}
+.cred svg{width:14px;height:14px;color:var(--brand)}
+.cred a{color:var(--brand);font-weight:700;text-decoration:none;word-break:break-all}
+.cred a:active{opacity:.6}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -329,6 +348,8 @@ input:disabled{cursor:not-allowed}
   <button class="btn b2" id="btnDone"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Xong &amp; xuất Excel</button>
 </div></div>
 
+<button class="fab" id="fab" type="button" aria-label="Quét mã"><svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M7 12h10"/></svg><span>Quét mã</span></button>
+
 <div id="sug"></div>
 
 <!-- Scanner -->
@@ -350,14 +371,21 @@ input:disabled{cursor:not-allowed}
 <!-- Upload DATA -->
 <div class="ov" id="upOv">
   <div class="modal">
-    <h3>Cập nhật DATA</h3>
-    <label class="l" for="pw">Mật khẩu</label>
+    <h3><svg viewBox="0 0 24 24"><path d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Cập nhật DATA</h3>
+    <label class="l" for="pw"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Mật khẩu</label>
     <input type="password" id="pw" inputmode="numeric" autocomplete="off" placeholder="Nhập mật khẩu">
-    <label class="l" for="fileIn" style="margin-top:10px">File .xlsx (A: Tỉnh, B: Ward, C: Deli station, D: Sort code)</label>
-    <input type="file" id="fileIn" accept=".xlsx,.xls" style="padding-top:10px;height:auto;min-height:46px">
-    <button class="btn b2" id="upGo">Cập nhật</button>
+    <label class="l" for="sheetUrl" style="margin-top:10px"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg>Link Google Sheet</label>
+    <input type="url" id="sheetUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/…">
+    <button class="btn b2" id="upLink">Cập nhật từ link</button>
+    <div class="or">hoặc</div>
+    <label class="l" for="fileIn"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5zM14 3v5h5"/></svg>File .xlsx / .csv</label>
+    <input type="file" id="fileIn" accept=".xlsx,.xls,.csv" style="padding-top:9px;height:auto;min-height:40px">
+    <button class="btn b3" id="upGo">Cập nhật từ file</button>
+    <div class="dmeta" id="dataMeta"></div>
+    <div class="dmeta">Cột: A Tỉnh · B Ward · C Deli station · D Sort code. Sheet cần chia sẻ “Bất kỳ ai có đường liên kết” (Người xem).</div>
     <button class="btn b1" id="upReset">Khôi phục DATA gốc</button>
     <button class="btn b1" id="upClose">Đóng</button>
+    <div class="cred"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Người tạo:</span><a href="https://link.seatalk.io/profile/open?seatalk_id=1310801728" target="_blank" rel="noopener">toan.nguyenanh@spxexpress.com</a></div>
   </div>
 </div>
 
@@ -443,7 +471,7 @@ function beep(ok){
 let tt;
 function toast(msg, type='info'){
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show ' + type;
-  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2400);
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), Math.max(2400, String(msg).length * 55));
 }
 
 /* ---------- Đồng hồ + giao diện ---------- */
@@ -859,6 +887,11 @@ $('#rdw').addEventListener('click', async e => {   // chạm để lấy nét l�
     if(fm.includes('continuous')) setTimeout(() => applyCam({ advanced:[{ focusMode:'continuous' }] }), 1400);
   }else if(fm.includes('continuous')) applyCam({ advanced:[{ focusMode:'continuous' }] });
 });
+function fitVF(){                           // khung tia quét khớp đúng vùng giải mã
+  const v = document.querySelector('#reader video'), f = document.querySelector('.vf');
+  if(!v || !f || !v.clientWidth) return;
+  const b = qrboxFn(v.clientWidth, v.clientHeight); f.style.width = b.width + 'px'; f.style.height = b.height + 'px';
+}
 async function startCamera(){
   const mk = () => new Html5Qrcode('reader', { verbose:false, formatsToSupport: SCAN_FMT(), experimentalFeatures:{ useBarCodeDetectorIfSupported:true } });
   const id = await bestBackCamera();
@@ -872,7 +905,7 @@ async function startCamera(){
     scanner = mk();
     await scanner.start({ facingMode:'environment' }, { fps:15, qrbox:qrboxFn, disableFlip:true }, onScan, () => {});
   }
-  setTimeout(setupCamTools, 350);
+  setTimeout(fitVF, 300); setTimeout(setupCamTools, 350); setTimeout(fitVF, 900);
 }
 async function openScanner(id){
   if(scBusy) return;
@@ -946,28 +979,100 @@ $('#scClose').onclick = async () => {
   }
 };
 
-/* ---------- Upload DATA ---------- */
+/* ---------- Upload DATA (file .xlsx hoặc link Google Sheet) ---------- */
 const upOv = $('#upOv');
-$('#btnUp').onclick = () => { $('#pw').value = ''; $('#fileIn').value = ''; upOv.classList.add('show'); };
+const fmtTime = t => { const d = new Date(t); return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+function renderMeta(){
+  const m = store.get('spx_data_meta', null);
+  $('#dataMeta').textContent = m ? `Đang dùng: ${m.src} · ${m.n} dòng · cập nhật ${fmtTime(m.time)}` : 'Đang dùng DATA gốc đi kèm app';
+}
+function checkPw(){ if($('#pw').value === PASS) return true; beep(false); toast('Sai mật khẩu', 'err'); return false; }
+const cleanRows = aoa => aoa.slice(1).map(r => [r[0], r[1], r[2], r[3]].map(c => String(c ?? '').trim())).filter(r => r[1] && r[2] && r[3]);
+function applyData(data, src){
+  if(!data.length) throw new Error('Không có dòng hợp lệ (cần cột A Tỉnh, B Ward, C Deli station, D Sort code)');
+  store.set('spx_data', data); store.set('spx_data_meta', { src, time: Date.now(), n: data.length });
+  buildData(data); fillProvinces(); rows.forEach(resolve); resolve(batch); save(); renderAll(); syncCont(); renderMeta();
+  upOv.classList.remove('show'); beep(true); toast(`Đã cập nhật ${data.length} dòng (${src})`, 'ok');
+}
+function parseCSV(t){
+  const out = []; let row = [], cur = '', q = false; t = t.replace(/^\uFEFF/, '');
+  for(let i = 0; i < t.length; i++){
+    const c = t[i];
+    if(q){ if(c === '"'){ if(t[i+1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+    else if(c === '"') q = true;
+    else if(c === ','){ row.push(cur); cur = ''; }
+    else if(c === '\n' || c === '\r'){ if(c === '\r' && t[i+1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if(cur !== '' || row.length){ row.push(cur); out.push(row); }
+  return out;
+}
+function sheetUrls(link){
+  link = String(link || '').trim();
+  const pub = link.match(/\/spreadsheets\/d\/e\/([\w-]+)/), m = link.match(/\/spreadsheets\/d\/([\w-]+)/);
+  const gid = (link.match(/[#&?]gid=(\d+)/) || [])[1] || '0';
+  if(pub) return [`https://docs.google.com/spreadsheets/d/e/${pub[1]}/pub?output=csv&gid=${gid}`];
+  if(!m) return [];
+  return [`https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&headers=1&gid=${gid}`,
+          `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=${gid}`];
+}
+async function fetchSheet(link){
+  const urls = sheetUrls(link);
+  if(!urls.length) throw new Error('Link không đúng dạng Google Sheet');
+  for(const u of urls){
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 15000);
+    try{
+      const res = await fetch(u, { cache:'no-store', signal: ac.signal });
+      if(!res.ok) continue;
+      const txt = await res.text();
+      if(/^\s*</.test(txt)) continue;                 // trang đăng nhập/HTML => sheet chưa công khai
+      const aoa = parseCSV(txt);
+      if(aoa.length > 1) return aoa;
+    }catch(e){ /* thử địa chỉ kế tiếp */ }
+    finally{ clearTimeout(to); }
+  }
+  throw new Error('Không đọc được Google Sheet. Hãy chia sẻ ở chế độ “Bất kỳ ai có đường liên kết” (Người xem) rồi thử lại');
+}
+$('#btnUp').onclick = () => {
+  $('#pw').value = ''; $('#fileIn').value = ''; $('#sheetUrl').value = store.get('spx_sheet_link', '');
+  renderMeta(); upOv.classList.add('show');
+};
 $('#upClose').onclick = () => upOv.classList.remove('show');
 $('#upReset').onclick = async () => {
-  if($('#pw').value !== PASS){ beep(false); return toast('Sai mật khẩu', 'err'); }
-  store.del('spx_data'); await loadData(); rows.forEach(resolve); resolve(batch); renderAll(); syncCont();
+  if(!checkPw()) return;
+  store.del('spx_data'); store.del('spx_data_meta'); await loadData(); rows.forEach(resolve); resolve(batch); renderAll(); syncCont(); renderMeta();
   upOv.classList.remove('show'); toast('Đã khôi phục DATA gốc', 'ok');
 };
+$('#upLink').onclick = async () => {
+  if(!checkPw()) return;
+  const link = $('#sheetUrl').value.trim(); if(!link) return toast('Chưa nhập link Google Sheet', 'err');
+  const btn = $('#upLink'), old = btn.textContent; btn.disabled = true; btn.textContent = 'Đang tải dữ liệu…';
+  try{
+    const aoa = await fetchSheet(link);
+    store.set('spx_sheet_link', link);
+    applyData(cleanRows(aoa), 'Google Sheet');
+  }catch(e){ beep(false); toast(e.message, 'err'); }
+  btn.disabled = false; btn.textContent = old;
+};
 $('#upGo').onclick = async () => {
-  if($('#pw').value !== PASS){ beep(false); return toast('Sai mật khẩu', 'err'); }
+  if(!checkPw()) return;
   const f = $('#fileIn').files[0]; if(!f) return toast('Chưa chọn file', 'err');
   try{
     const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
     const aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-    const data = aoa.slice(1).map(r => [r[0], r[1], r[2], r[3]].map(c => String(c ?? '').trim())).filter(r => r[1] && r[2] && r[3]);
-    if(!data.length) throw new Error('File không có dữ liệu hợp lệ');
-    store.set('spx_data', data); buildData(data); fillProvinces();
-    rows.forEach(resolve); resolve(batch); save(); renderAll(); syncCont(); upOv.classList.remove('show');
-    beep(true); toast(`Đã cập nhật ${data.length} dòng`, 'ok');
+    applyData(cleanRows(aoa), 'File ' + f.name);
   }catch(e){ beep(false); toast('Lỗi file: ' + e.message, 'err'); }
 };
+
+/* ---------- Nút nổi Quét mã (góc dưới trái) ---------- */
+$('#fab').onclick = () => {
+  let r = rows[curIndex()];
+  if(!r || r.track) r = rows.find(x => !x.track && !x.ward) || addRow();   // hàng đang xem còn trống thì quét vào đó
+  const el = rowEl(r.id); if(el) goTo(el);
+  openScanner(r.id);
+};
+addEventListener('focusin', e => { if(e.target.matches && e.target.matches('input,select')) document.body.classList.add('typing'); });
+addEventListener('focusout', () => setTimeout(() => { if(!(document.activeElement && document.activeElement.matches('input,select'))) document.body.classList.remove('typing'); }, 150));
 
 /* ---------- Lịch sử 3 file gần nhất (IndexedDB) ---------- */
 const HIST_MAX = 3;
